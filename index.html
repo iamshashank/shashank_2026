@@ -541,7 +541,7 @@
 optimizing worker efficiency and right-sizing pod counts while 
 maintaining SLAs through profiling and adding safe pause/resume 
 checkpoint to long running background jobs.</li>
-<li>Designed our in-house sidekiq-pro replacement utilizing Kafka and offering sidekiq-pro features such as Batches and other custom features like Fair-Scheduler which are crusial in a Multi-tenant system at <strong>under 50% the cost</strong></li>
+<li>Designed our in-house sidekiq-pro replacement utilizing Kafka and offering sidekiq-pro features such as Batches and other custom features like Fair-Scheduler which are crucial in a Multi-tenant system at <strong>under 50% the cost</strong></li>
           <li>Introduced <strong>tiered caching and read-replica routing</strong> to offload primary database pressure and improve API and job throughput under peak campaign load.</li>
           <li>Revamped internal systems to use Databricks so single background job can safely work with <strong>100M+ row datasets</strong> with <strong>checkpoint-based orchestration</strong> so long-running bulk jobs resume safely after failure without full restarts.</li>
           <li>Designed <strong>failover for scenarios where sidekiq redis memory reached critial levels</strong> for critical pipelines</li>
