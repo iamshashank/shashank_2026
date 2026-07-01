@@ -132,26 +132,43 @@
     ]
   }
   </script>
-
   <!-- Standalone: zero external dependencies — all CSS inlined, system fonts only -->
   <style>
     :root {
       --ink: #1a2332;
       --muted: #4a5568;
       --accent: #0f4c75;
+      --accent-2: #3282b8;
       --accent-light: #e8f1f8;
       --rule: #d1dae6;
       --paper: #ffffff;
+      --bg: #eef2f6;
+      --card: #ffffff;
+      --chip: #eef4fb;
+      --shadow: rgba(26, 35, 50, 0.10);
+      --glow: rgba(50, 130, 184, 0.35);
+    }
+
+    [data-theme="dark"] {
+      --ink: #e8eef6;
+      --muted: #9fb0c4;
+      --accent: #5fb0e8;
+      --accent-2: #7fc8ff;
+      --accent-light: #16273a;
+      --rule: #2a3a4f;
+      --paper: #0e1620;
+      --bg: #070b11;
+      --card: #111c28;
+      --chip: #16263a;
+      --shadow: rgba(0, 0, 0, 0.5);
+      --glow: rgba(95, 176, 232, 0.45);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    @page {
-      size: A4;
-      margin: 14mm 16mm;
-    }
+    @page { size: A4; margin: 14mm 16mm; }
 
-    html { font-size: 10.5pt; }
+    html { font-size: 10.5pt; scroll-behavior: smooth; }
 
     body {
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -162,104 +179,175 @@
       print-color-adjust: exact;
     }
 
-    .page {
-      max-width: 210mm;
-      margin: 0 auto;
-      padding: 0;
+    a { color: var(--accent); }
+
+    /* ---------- Screen experience ---------- */
+    @media screen {
+      body {
+        background: var(--bg);
+        padding: 0 16px 64px;
+        transition: background 0.4s ease, color 0.4s ease;
+        overflow-x: hidden;
+      }
+
+      /* Animated ambient background */
+      .aurora {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .aurora span {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(70px);
+        opacity: 0.45;
+        animation: float 18s ease-in-out infinite;
+      }
+      .aurora span:nth-child(1) { width: 480px; height: 480px; background: var(--accent-2); top: -120px; left: -100px; }
+      .aurora span:nth-child(2) { width: 420px; height: 420px; background: var(--accent); bottom: -140px; right: -80px; animation-delay: -6s; }
+      .aurora span:nth-child(3) { width: 300px; height: 300px; background: #8e7dff; top: 40%; left: 60%; animation-delay: -12s; opacity: 0.25; }
+
+      @keyframes float {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33%       { transform: translate(40px, -30px) scale(1.1); }
+        66%       { transform: translate(-30px, 40px) scale(0.95); }
+      }
+
+      /* Scroll progress bar */
+      .progress {
+        position: fixed;
+        top: 0; left: 0;
+        height: 3px;
+        width: 0%;
+        z-index: 60;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+        box-shadow: 0 0 10px var(--glow);
+      }
+
+      .toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        max-width: 210mm;
+        margin: 0 auto;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 0;
+      }
+
+      .page {
+        position: relative;
+        z-index: 1;
+        background: var(--card);
+        max-width: 210mm;
+        margin: 0 auto;
+        padding: 40px 44px;
+        box-shadow: 0 12px 48px var(--shadow);
+        border-radius: 14px;
+        border: 1px solid var(--rule);
+        transition: background 0.4s ease, border-color 0.4s ease;
+      }
+
+      .contact a:hover { text-decoration: underline; }
+
+      /* Reveal-on-scroll */
+      .reveal {
+        opacity: 0;
+        transform: translateY(26px);
+        transition: opacity 0.7s cubic-bezier(.2,.7,.2,1), transform 0.7s cubic-bezier(.2,.7,.2,1);
+      }
+      .reveal.in { opacity: 1; transform: none; }
     }
 
-    .toolbar {
-      max-width: 210mm;
-      margin: 0 auto 12px;
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    .print-btn {
+    .tool-btn {
       font: inherit;
       font-size: 9pt;
       font-weight: 600;
       color: var(--accent);
-      background: #fff;
+      background: var(--card);
       border: 1px solid var(--rule);
-      border-radius: 4px;
-      padding: 6px 14px;
+      border-radius: 8px;
+      padding: 8px 14px;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
     }
-
-    .print-btn:hover { background: var(--accent-light); }
-
-    @media screen {
-      body {
-        background: #eef2f6;
-        padding: 24px 16px 48px;
-      }
-
-      .page {
-        background: var(--paper);
-        padding: 28px 32px;
-        box-shadow: 0 4px 24px rgba(26, 35, 50, 0.08);
-        border-radius: 4px;
-      }
-
-      .contact a:hover { text-decoration: underline; }
-    }
+    .tool-btn:hover { background: var(--accent-light); transform: translateY(-1px); box-shadow: 0 4px 14px var(--shadow); }
+    .tool-btn:active { transform: translateY(0); }
 
     @media screen and (max-width: 640px) {
-      body { padding: 12px 8px 32px; }
-      .page { padding: 20px 16px; }
+      .page { padding: 24px 18px; border-radius: 10px; }
       .skills-grid { grid-template-columns: 1fr; }
       .skills-grid dt { margin-top: 6px; }
       .two-col { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: 1fr 1fr; }
     }
 
     /* Header */
     header {
       border-bottom: 2px solid var(--accent);
-      padding-bottom: 14px;
-      margin-bottom: 18px;
+      padding-bottom: 16px;
+      margin-bottom: 20px;
     }
 
     h1 {
       font-family: Georgia, "Times New Roman", Times, serif;
-      font-size: 26pt;
+      font-size: 28pt;
       font-weight: 700;
       letter-spacing: -0.02em;
-      color: var(--ink);
       line-height: 1.1;
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
 
     .tagline {
       font-size: 12pt;
       font-weight: 600;
       color: var(--accent);
-      margin-top: 6px;
+      margin-top: 8px;
+      min-height: 1.4em;
     }
+    .cursor-blink::after {
+      content: "▍";
+      margin-left: 1px;
+      animation: blink 1s step-end infinite;
+      color: var(--accent-2);
+    }
+    @keyframes blink { 50% { opacity: 0; } }
 
     .contact {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px 18px;
-      margin-top: 10px;
+      gap: 8px 10px;
+      margin-top: 14px;
       font-size: 9.5pt;
       color: var(--muted);
     }
-
-    .contact a {
+    .contact a, .contact span.cinfo {
       color: var(--accent);
       text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 11px;
+      border: 1px solid var(--rule);
+      border-radius: 999px;
+      background: var(--chip);
+      transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
     }
-
-    .contact span::before {
-      content: "·";
-      margin-right: 18px;
-      color: var(--rule);
-    }
-
-    .contact span:first-child::before { content: none; margin: 0; }
+    .contact a:hover { transform: translateY(-2px); box-shadow: 0 6px 16px var(--shadow); text-decoration: none; }
+    .contact .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 8px var(--glow); }
 
     /* Sections */
-    section { margin-bottom: 16px; }
+    section { margin-bottom: 22px; }
 
     h2 {
       font-family: Georgia, "Times New Roman", Times, serif;
@@ -269,35 +357,99 @@
       letter-spacing: 0.08em;
       color: var(--accent);
       border-bottom: 1px solid var(--rule);
-      padding-bottom: 4px;
-      margin-bottom: 10px;
+      padding-bottom: 5px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h2::before {
+      content: "";
+      width: 10px; height: 10px;
+      border-radius: 3px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 8px var(--glow);
     }
 
-    .summary {
-      font-size: 10pt;
-      color: var(--ink);
-      text-align: justify;
-    }
+    .summary { font-size: 10pt; color: var(--ink); text-align: justify; }
+    .summary strong { color: var(--accent); }
 
-    /* Skills grid */
+    /* Skills */
     .skills-grid {
       display: grid;
-      grid-template-columns: 118px 1fr;
-      gap: 4px 12px;
+      grid-template-columns: 130px 1fr;
+      gap: 8px 12px;
       font-size: 9.5pt;
     }
-
-    .skills-grid dt {
-      font-weight: 600;
-      color: var(--muted);
+    .skills-grid dt { font-weight: 600; color: var(--muted); padding-top: 3px; }
+    .skills-grid dd { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      display: inline-block;
+      padding: 3px 10px;
+      background: var(--chip);
+      border: 1px solid var(--rule);
+      border-radius: 999px;
+      font-size: 9pt;
+      color: var(--ink);
+      cursor: default;
+      transition: transform 0.12s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .chip:hover {
+      transform: translateY(-2px) scale(1.04);
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #fff;
+      box-shadow: 0 6px 16px var(--glow);
     }
 
-    .skills-grid dd { color: var(--ink); }
+    /* Metrics */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .metric {
+      background: var(--chip);
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      padding: 16px 12px;
+      text-align: center;
+      transition: transform 0.18s ease, box-shadow 0.25s ease;
+    }
+    .metric:hover { transform: translateY(-4px); box-shadow: 0 10px 24px var(--shadow); }
+    .metric .num {
+      font-family: Georgia, serif;
+      font-size: 22pt;
+      font-weight: 700;
+      line-height: 1;
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .metric .label { font-size: 8.5pt; color: var(--muted); margin-top: 6px; }
 
-    /* Experience */
-    .role-block { margin-bottom: 14px; }
-
+    /* Experience timeline */
+    .timeline { position: relative; padding-left: 26px; }
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 6px; top: 6px; bottom: 6px;
+      width: 2px;
+      background: linear-gradient(var(--accent), var(--accent-2));
+      opacity: 0.5;
+    }
+    .role-block { position: relative; margin-bottom: 20px; }
     .role-block:last-child { margin-bottom: 0; }
+    .role-block::before {
+      content: "";
+      position: absolute;
+      left: -26px; top: 5px;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--card);
+      border: 3px solid var(--accent-2);
+      box-shadow: 0 0 0 4px var(--card), 0 0 12px var(--glow);
+    }
 
     .role-header {
       display: flex;
@@ -307,82 +459,30 @@
       gap: 4px;
       margin-bottom: 2px;
     }
+    .company { font-weight: 700; font-size: 11.5pt; }
+    .dates { font-size: 9.5pt; color: var(--muted); font-weight: 500; }
+    .title { font-size: 10pt; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
 
-    .company {
-      font-weight: 700;
-      font-size: 11pt;
-    }
-
-    .dates {
-      font-size: 9.5pt;
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    .title {
-      font-size: 10pt;
-      font-weight: 600;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-
-    ul.bullets {
-      list-style: none;
-      padding: 0;
-    }
-
+    ul.bullets { list-style: none; padding: 0; }
     ul.bullets li {
       position: relative;
-      padding-left: 14px;
-      margin-bottom: 5px;
+      padding-left: 16px;
+      margin-bottom: 6px;
       font-size: 9.8pt;
       text-align: justify;
     }
-
     ul.bullets li::before {
       content: "";
       position: absolute;
-      left: 0;
-      top: 7px;
-      width: 5px;
-      height: 5px;
-      background: var(--accent);
+      left: 0; top: 7px;
+      width: 6px; height: 6px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
       border-radius: 50%;
     }
+    ul.bullets li strong { font-weight: 600; color: var(--accent); }
 
-    ul.bullets li strong { font-weight: 600; }
+    .stack-note { font-size: 9pt; color: var(--muted); font-style: italic; margin-top: 8px; }
 
-    .stack-note {
-      font-size: 9pt;
-      color: var(--muted);
-      font-style: italic;
-      margin-top: 6px;
-    }
-
-    /* Impact table */
-    .impact {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 9.5pt;
-    }
-
-    .impact th,
-    .impact td {
-      text-align: left;
-      padding: 6px 10px;
-      border: 1px solid var(--rule);
-    }
-
-    .impact th {
-      background: var(--accent-light);
-      color: var(--accent);
-      font-weight: 600;
-      width: 32%;
-    }
-
-    .impact tr:nth-child(even) td { background: #fafbfc; }
-
-    /* Education row */
     .edu-line {
       display: flex;
       justify-content: space-between;
@@ -390,55 +490,62 @@
       gap: 4px;
       font-size: 10pt;
     }
-
     .edu-line .school { font-weight: 600; }
-
     .badge {
       display: inline-block;
-      background: var(--accent-light);
-      color: var(--accent);
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #fff;
       font-size: 9pt;
       font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 3px;
-      margin-top: 6px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-top: 8px;
     }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-    .two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    /* Machine-readable ATS block — hidden visually & in print, parseable by crawlers */
+    /* Machine-readable ATS block */
     .ats-metadata {
       position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
       overflow: hidden;
       clip: rect(0, 0, 0, 0);
       white-space: nowrap;
       border: 0;
     }
 
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .reveal { opacity: 1 !important; transform: none !important; }
+    }
+
+    /* ---------- Print: revert to clean ATS-friendly resume ---------- */
     @media print {
-      .ats-metadata,
-      .toolbar { display: none !important; }
-      body { background: white; padding: 0; }
+      .ats-metadata, .toolbar, .aurora, .progress { display: none !important; }
+      html { scroll-behavior: auto; }
+      body { background: #fff !important; color: #1a2332 !important; padding: 0; }
       .page {
         max-width: none;
         padding: 0;
         box-shadow: none;
+        border: none;
         border-radius: 0;
+        background: #fff !important;
       }
+      h1 { color: #1a2332 !important; -webkit-text-fill-color: #1a2332; }
+      .metric .num { color: #0f4c75 !important; -webkit-text-fill-color: #0f4c75; }
+      .reveal { opacity: 1 !important; transform: none !important; }
+      .timeline::before, .role-block::before { box-shadow: none; }
       section { break-inside: avoid; }
       .role-block { break-inside: avoid-page; }
+      .chip, .contact a, .contact span.cinfo { border-color: #d1dae6; background: #eef4fb; }
     }
   </style>
 </head>
 <body>
+  <div class="progress" id="progress"></div>
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+
   <!-- Plain-text ATS keyword corpus (invisible; not rendered in PDF) -->
   <div class="ats-metadata" aria-hidden="true">
     <h1>Shashank Yadav</h1>
@@ -454,22 +561,25 @@
   </div>
 
   <div class="toolbar" aria-label="Actions">
-    <button type="button" class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+    <button type="button" class="tool-btn" id="themeBtn" aria-label="Toggle theme">
+      <span id="themeIcon">🌙</span><span id="themeLabel">Dark</span>
+    </button>
+    <button type="button" class="tool-btn" onclick="window.print()">⬇ Print / Save as PDF</button>
   </div>
 
   <div class="page">
-    <header>
+    <header class="reveal">
       <h1 itemprop="name">Shashank Yadav</h1>
-      <p class="tagline" itemprop="jobTitle">Senior Backend Engineer · Ruby on Rails · Distributed Systems at Scale · AI/Agent</p>
-      <div class="contact" itemprop="address" itemscope itemtype="https://schema.org/PostalAddress">
-        <span itemprop="addressLocality">Gurugram</span><span itemprop="addressCountry">India</span>
-        <span><a href="https://www.linkedin.com/in/iamshashankio/" rel="me" itemprop="url">linkedin.com/in/iamshashankio</a></span>
-        <span><a href="https://github.com/iamshashank" rel="me">github.com/iamshashank</a></span>
-        <span itemprop="email">shashank0x1@gmail.com</span>
+      <p class="tagline" id="tagline" itemprop="jobTitle"></p>
+      <div class="contact">
+        <span class="cinfo"><span class="dot"></span><span itemprop="address" itemscope itemtype="https://schema.org/PostalAddress"><span itemprop="addressLocality">Gurugram</span>, <span itemprop="addressCountry">India</span></span></span>
+        <a href="https://www.linkedin.com/in/iamshashankio/" rel="me" itemprop="url"><span class="dot"></span>linkedin.com/in/iamshashankio</a>
+        <a href="https://github.com/iamshashank" rel="me"><span class="dot"></span>github.com/iamshashank</a>
+        <a href="mailto:shashank0x1@gmail.com" itemprop="email"><span class="dot"></span>shashank0x1@gmail.com</a>
       </div>
     </header>
 
-    <section>
+    <section class="reveal">
       <h2>Professional Summary</h2>
       <p class="summary">
         Senior Software Engineer with <strong>8+ years</strong> building and operating high-throughput
@@ -477,32 +587,42 @@
         (<strong>Sidekiq</strong>), read-replica and <strong>tiered caching</strong> strategies, and reliability
         patterns—failover, checkpointing and idempotency for systems processing <strong>200M+ background jobs daily</strong>. Delivered measurable
         business impact including <strong>~35% reduction in worker pod count</strong> via batching inserts and better pod utilization,
-        improved stability and reliability of background jobs, and modernization of internal systems for scale and cost efficiency.
+        improved stability and reliability of background jobs, and modernization of internal systems for scale and cost efficiency. Designed and architeched our new in-house sidekiq alternative costing us <strong>50% less</strong> under load. 
         Actively applies <strong>agentic AI workflows</strong> to accelerate triage, debugging, and delivery. GATE qualified (2018).
       </p>
     </section>
 
-    <section>
+    <section class="reveal">
+      <h2>Key Impact</h2>
+      <div class="metrics">
+        <div class="metric"><div class="num" data-target="8" data-suffix="+">0</div><div class="label">Years building Rails at scale</div></div>
+        <div class="metric"><div class="num" data-target="200" data-suffix="M+">0</div><div class="label">Background jobs / day</div></div>
+        <div class="metric"><div class="num" data-target="35" data-suffix="%">0</div><div class="label">Worker pod / cost reduction</div></div>
+        <div class="metric"><div class="num" data-target="100" data-suffix="M+">0</div><div class="label">Row datasets w/ checkpoints</div></div>
+      </div>
+    </section>
+
+    <section class="reveal">
       <h2>Technical Skills</h2>
       <dl class="skills-grid">
         <dt>Languages</dt>
-        <dd>Ruby, SQL, JavaScript (prior full-stack)</dd>
+        <dd><span class="chip">Ruby</span><span class="chip">SQL</span><span class="chip">JavaScript</span></dd>
         <dt>Frameworks</dt>
-        <dd>Ruby on Rails 4.x–7.x, Rails engines &amp; internal gems</dd>
+        <dd><span class="chip">Rails 4.x–7.x</span><span class="chip">Rails engines</span><span class="chip">Internal gems</span></dd>
         <dt>Async &amp; cache</dt>
-        <dd>Sidekiq (Pro patterns), Redis, tiered caching, job deduplication &amp; locking</dd>
+        <dd><span class="chip">Sidekiq (Pro)</span><span class="chip">Redis</span><span class="chip">Tiered caching</span><span class="chip">Job dedup &amp; locking</span></dd>
         <dt>Data &amp; scale</dt>
-        <dd>MySQL (query/schema optimization), read replicas, bulk pipelines, 100M+ row processing</dd>
+        <dd><span class="chip">MySQL</span><span class="chip">Read replicas</span><span class="chip">Bulk pipelines</span><span class="chip">100M+ rows</span></dd>
         <dt>Reliability</dt>
-        <dd>Checkpoint orchestration, failover design, idempotent workers, capacity planning</dd>
+        <dd><span class="chip">Checkpoint orchestration</span><span class="chip">Failover design</span><span class="chip">Idempotent workers</span><span class="chip">Capacity planning</span></dd>
         <dt>Platform</dt>
-        <dd>Multi-tenant services, Docker, API throughput tuning, TDD, Agile</dd>
+        <dd><span class="chip">Multi-tenant</span><span class="chip">Docker</span><span class="chip">API tuning</span><span class="chip">TDD</span><span class="chip">Agile</span></dd>
         <dt>AI &amp; tooling</dt>
-        <dd>Cursor Pro, MCP agent orchestration, Jira &amp; Airbrake integrations, AI-assisted triage &amp; code review</dd>
+        <dd><span class="chip">Cursor Pro</span><span class="chip">MCP agents</span><span class="chip">Jira</span><span class="chip">Airbrake</span><span class="chip">AI triage &amp; review</span></dd>
       </dl>
     </section>
 
-    <section>
+    <section class="reveal">
       <h2>AI-Assisted Engineering</h2>
       <p class="summary" style="margin-bottom: 8px;">
         Hands-on practitioner of AI-augmented development—building practical agent workflows that compound engineering output
@@ -513,69 +633,56 @@
         <li>Designed an end-to-end workflow where agents analyze code on the <strong>local machine</strong> and produce <strong>suggested PR fixes</strong> with detailed comments and rationale—compressing time from ticket assignment to review-ready change sets.</li>
         <li>Enforced <strong>strict data-access guardrails</strong> per company policy: production database access is not granted to local AI agents, demonstrating security-conscious adoption that prioritizes productivity without exposing sensitive systems.</li>
         <li>Continuously refines agent prompts, tool boundaries, and human-in-the-loop review to improve signal quality, reduce toil, and increase ship velocity across backend and async job systems.</li>
+        <li>Created a more scalable backgrouind job processor from ground up which can take over sidekiq at <strong>< 50% its cost</strong></li>
       </ul>
     </section>
-    <section>
-      <h2>Key Impact</h2>
-      <table class="impact">
-        <tbody><tr><th>Sidekiq / workers</th><td>Higher throughput; ~35% fewer pods for comparable load</td></tr>
-        <tr><th>Data scale</th><td>Background jobs to run with over 100M+ records with checkpoint resume</td></tr>
-        <tr><th>Platform volume</th><td>Systems operating at 200M+ jobs/day throughput</td></tr>
-        <tr><th>Cost efficiency</th><td>Direct infra savings via pod count reduction, workflow and code optimization</td></tr>
-        <tr><th>AI productivity</th><td>Custom Jira/Airbrake agents for faster triage and PR-ready fixes from assigned tickets</td></tr>
-      </tbody></table>
-    </section>
-    <section>
+
+    <section class="reveal">
       <h2>Professional Experience</h2>
-
-      <div class="role-block">
-        <div class="role-header">
-          <span class="company">Punchh (PAR Technology)</span>
-          <span class="dates">Nov 2021 – Present · Gurugram</span>
+      <div class="timeline">
+        <div class="role-block">
+          <div class="role-header">
+            <span class="company">Punchh (PAR Technology)</span>
+            <span class="dates">Nov 2021 – Present · Gurugram</span>
+          </div>
+          <p class="title">Senior Software Engineer (Mar 2024 – Present) · SDE II (Nov 2021 – Present)</p>
+          <ul class="bullets">
+            <li>Scaled async processing for a platform running <strong>200M+ background jobs/day</strong> by redesigning Sidekiq workflows—queue topology, batching, concurrency tuning, and hot-path refactors.</li>
+            <li><strong>Reduced infrastructure cost ~35%</strong> by optimizing worker efficiency and right-sizing pod counts while maintaining SLAs through profiling and adding safe pause/resume checkpoint to long running background jobs.</li>
+            <li>Designed our in-house sidekiq-pro replacement utilizing Kafka and offering sidekiq-pro features such as Batches and other custom features like Fair-Scheduler which are crusial in a Multi-tenant system at <strong>under 50% the cost</strong></li>
+            <li>Introduced <strong>tiered caching and read-replica routing</strong> to offload primary database pressure and improve API and job throughput under peak campaign load.</li>
+            <li>Revamped internal systems to use Databricks so single background job can safely work with <strong>100M+ row datasets</strong> with <strong>checkpoint-based orchestration</strong> so long-running bulk jobs resume safely after failure without full restarts.</li>
+            <li>Designed <strong>failover for scenarios where sidekiq redis memory reached critical levels</strong> for critical pipelines.</li>
+            <li>Extracted re-usable logic for (<strong>failover, checkpoints</strong>) into reusable components across services.</li>
+          </ul>
+          <p class="stack-note">Stack: Ruby on Rails, Sidekiq, Redis, MySQL (+ replicas), Warehouse (Databricks), MongoDB, POS, multi-tenant configuration, containerized services</p>
         </div>
-        <p class="title">Senior Software Engineer (Mar 2024 – Present) · SDE II (Nov 2021 – Present)</p>
-        <ul class="bullets">
-          <li>Scaled async processing for a platform running <strong>200M+ background jobs/day</strong> by redesigning Sidekiq workflows—queue topology, batching, concurrency tuning, and hot-path refactors.</li>
-          <li><strong>Reduced infrastructure cost ~35%</strong> by 
-optimizing worker efficiency and right-sizing pod counts while 
-maintaining SLAs through profiling and adding safe pause/resume 
-checkpoint to long running background jobs.</li>
-          <li>Introduced <strong>tiered caching and read-replica routing</strong> to offload primary database pressure and improve API and job throughput under peak campaign load.</li>
-          <li>Revamped internal systems to use Databricks so single background job can safely work with <strong>100M+ row datasets</strong> with <strong>checkpoint-based orchestration</strong> so long-running bulk jobs resume safely after failure without full restarts.</li>
-          <li>Designed <strong>failover for scenarios where sidekiq redis memory reached critial levels</strong> for critical pipelines</li>
-          <li>Extracting out re-usable logic for ( <strong> failover, checkpoints </strong>) into reuasble component cross services</li>
-        </ul>
-        <p class="stack-note">Stack: Ruby on Rails, Sidekiq, Redis, 
-MySQL (+ replicas), Wharehouse (Databricks), Mongo DB, POS, multi-tenant
- configuration, containerized services</p>
-      </div>
 
-      <div class="role-block">
-        <div class="role-header">
-          <span class="company">Daffodil Software</span>
-          <span class="dates">Mar 2018 – Oct 2021 · Gurgaon</span>
+        <div class="role-block">
+          <div class="role-header">
+            <span class="company">Daffodil Software</span>
+            <span class="dates">Mar 2018 – Oct 2021 · Gurgaon</span>
+          </div>
+          <p class="title">Associate IT — Full Stack Ruby on Rails</p>
+          <ul class="bullets">
+            <li>Upgraded Rails monoliths from 4 → 5 → 6; improved stability and long-term maintainability across e-commerce and real-estate products.</li>
+            <li>Reduced page load times by fixing N+1 queries, schema refactors, Redis caching, and strategic memoization.</li>
+            <li>Modularized monoliths by extracting reusable domains into <strong>Rails engines</strong> packaged as internal gems for cross-project reuse.</li>
+          </ul>
         </div>
-        <p class="title">Associate IT — Full Stack Ruby on Rails</p>
-        <ul class="bullets">
-          <li>Upgraded Rails monoliths from 4 → 5 → 6; improved 
-stability and long-term maintainability across e-commerce and 
-real-estate products.</li>
-          <li>Reduced page load times by fixing N+1 queries, schema refactors, Redis caching, and strategic memoization.</li>
-          <li>Modularized monoliths by extracting reusable domains into <strong>Rails engines</strong> packaged as internal gems for cross-project reuse.</li>
-        </ul>
-      </div>
 
-      <div class="role-block">
-        <div class="role-header">
-          <span class="company">CampusBox</span>
-          <span class="dates">May 2017 – Jul 2017</span>
+        <div class="role-block">
+          <div class="role-header">
+            <span class="company">CampusBox</span>
+            <span class="dates">May 2017 – Jul 2017</span>
+          </div>
+          <p class="title">AngularJS Frontend Developer (Intern)</p>
         </div>
-        <p class="title">AngularJS Frontend Developer (Intern)</p>
       </div>
     </section>
 
     <div class="two-col">
-      <section>
+      <section class="reveal">
         <h2>Education</h2>
         <div class="edu-line">
           <span class="school">B.Tech — Galgotias College of Engineering &amp; Technology</span>
@@ -584,12 +691,117 @@ real-estate products.</li>
         <span class="badge">GATE 2018 — Qualified</span>
       </section>
 
-      <section>
+      <section class="reveal">
         <h2>Recognition</h2>
         <p style="font-size: 10pt;"><strong>Hero Award</strong> — Punchh / PAR (2020–2021)</p>
       </section>
     </div>
   </div>
 
+  <script>
+    (function () {
+      var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-</body></html>
+      /* ---- Theme toggle (persisted) ---- */
+      var root = document.documentElement;
+      var themeBtn = document.getElementById('themeBtn');
+      var themeIcon = document.getElementById('themeIcon');
+      var themeLabel = document.getElementById('themeLabel');
+      function applyTheme(t) {
+        if (t === 'dark') {
+          root.setAttribute('data-theme', 'dark');
+          themeIcon.textContent = '☀';
+          themeLabel.textContent = 'Light';
+        } else {
+          root.removeAttribute('data-theme');
+          themeIcon.textContent = '🌙';
+          themeLabel.textContent = 'Dark';
+        }
+      }
+      var saved = null;
+      try { saved = localStorage.getItem('resume-theme'); } catch (e) {}
+      if (!saved) {
+        saved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      applyTheme(saved);
+      themeBtn.addEventListener('click', function () {
+        var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+        try { localStorage.setItem('resume-theme', next); } catch (e) {}
+      });
+
+      /* ---- Typewriter tagline ---- */
+      var phrases = [
+        'Senior Backend Engineer',
+        'Ruby on Rails · Sidekiq at scale',
+        'Distributed Systems · 200M+ jobs/day',
+        'AI / Agentic Workflows'
+      ];
+      var el = document.getElementById('tagline');
+      if (reduceMotion) {
+        el.textContent = 'Senior Backend Engineer · Ruby on Rails · Distributed Systems · AI/Agent';
+      } else {
+        el.classList.add('cursor-blink');
+        var pi = 0, ci = 0, deleting = false;
+        function tick() {
+          var word = phrases[pi];
+          el.textContent = deleting ? word.slice(0, --ci) : word.slice(0, ++ci);
+          var delay = deleting ? 35 : 70;
+          if (!deleting && ci === word.length) { delay = 1600; deleting = true; }
+          else if (deleting && ci === 0) { deleting = false; pi = (pi + 1) % phrases.length; delay = 350; }
+          setTimeout(tick, delay);
+        }
+        setTimeout(tick, 500);
+      }
+
+      /* ---- Scroll progress bar ---- */
+      var progress = document.getElementById('progress');
+      function onScroll() {
+        var h = document.documentElement.scrollHeight - window.innerHeight;
+        progress.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + '%';
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      /* ---- Reveal on scroll ---- */
+      var reveals = document.querySelectorAll('.reveal');
+      if (reduceMotion || !('IntersectionObserver' in window)) {
+        reveals.forEach(function (r) { r.classList.add('in'); });
+      } else {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+          });
+        }, { threshold: 0.12 });
+        reveals.forEach(function (r) { io.observe(r); });
+      }
+
+      /* ---- Animated counters ---- */
+      var nums = document.querySelectorAll('.metric .num');
+      function animateNum(node) {
+        var target = parseFloat(node.getAttribute('data-target'));
+        var suffix = node.getAttribute('data-suffix') || '';
+        if (reduceMotion) { node.textContent = target + suffix; return; }
+        var start = performance.now(), dur = 1400;
+        function frame(now) {
+          var p = Math.min((now - start) / dur, 1);
+          var eased = 1 - Math.pow(1 - p, 3);
+          node.textContent = Math.round(target * eased) + suffix;
+          if (p < 1) requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+      }
+      if (!('IntersectionObserver' in window)) {
+        nums.forEach(animateNum);
+      } else {
+        var io2 = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { animateNum(e.target); io2.unobserve(e.target); }
+          });
+        }, { threshold: 0.5 });
+        nums.forEach(function (n) { io2.observe(n); });
+      }
+    })();
+  </script>
+</body>
+</html>
